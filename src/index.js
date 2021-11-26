@@ -12,11 +12,23 @@ const treeContainer = document.querySelector(".tree");
 const buildElement = (name, type) => {
   const element = document.createElement(`li`)
   element.textContent = name;
+  if (type.kind === 'directory') {
+    element.classList.add('folder')
+  } else {
+    element.classList.add('file')
+  }
   return element;
 }
 
 const buildList = (folders) => {
   const list = document.createElement('ul');
+  folders.sort((folder) => {
+    if (folder.value.kind === 'file') {
+      return 1
+    }
+    return - 1;
+  })
+  console.log(folders);
   folders.forEach((element) => {
     const {key: name, value: type} = element;
     list.appendChild(buildElement(name, type))
@@ -31,9 +43,6 @@ button.addEventListener('click', async (evt) => {
   for await (const [key, value] of dir.entries()) {
     structure.push({ key, value })
   }
-  console.log(structure);
-  console.log(buildList(structure));
-  console.log(treeContainer);
   treeContainer.appendChild(buildList(structure));
 });
 
