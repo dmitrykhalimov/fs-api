@@ -6,6 +6,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
   alert('File API не поддерживается данным браузером');
 }
 
+let counter = 0;
 const button = document.querySelector(".open-folder");
 const treeContainer = document.querySelector(".tree");
 
@@ -17,15 +18,20 @@ const getStructure = async (directory) => {
   return structure;
 }
 
+const createInput = (id) => {
+  return `<input type="checkbox" id="${id}-${counter}">
+  <label for="${id}-${counter}">${id}</label>`;
+}
+
+
 const buildElement = async (name, type) => {
+  counter++;
   const element = document.createElement(`li`);
   
   if (type.kind === 'directory') {
-    element.classList.add('folder')
-    const paragraph = document.createElement(`p`);
-    paragraph.textContent = name;
+    element.classList.add('directory')
+    element.innerHTML = createInput(name);
     const test = await getStructure(type);
-    element.appendChild(paragraph);
     element.appendChild(buildList(test));
   } else {
     element.classList.add('file')

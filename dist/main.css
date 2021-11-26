@@ -6,6 +6,18 @@ ul {
   color: green;
 }
 
-.folder {
+.directory {
   color: red;
+}
+
+input {
+  display: none;
+}
+
+li ul {
+  display: none;
+}
+
+input:checked ~ ul {
+  display: block;
 }
