@@ -13,7 +13,6 @@ const getStructure = async (directory) => {
   const structure = [];
   for await (const [key, value] of directory.entries()) {
     const element = await value.getFile();
-    console.log(element);
     structure.push({ key, value, updated: element.lastModified})
   }
   return structure;
@@ -24,6 +23,19 @@ const createInput = (id) => {
   <label for="${id}-${counter}">${id}</label>`;
 }
 
+const getUpdated = async () => {
+  const updated = [];
+  const elements = await getStructure(rootFolder);
+  elements.forEach((element) => {
+    if (element.value.kind) {
+      if (element.updated > lastUpdateDate) {
+        updated.push(element);
+      };
+    }
+  })
+  lastUpdateDate = new Date().getTime();
+  console.log(updated);
+}
 
 const buildElement = async (name, type) => {
   counter++;
@@ -54,15 +66,11 @@ const buildList = (folders) => {
 button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
-  await set('directory', rootFolder);
   treeContainer.appendChild(buildList(elements));
 });
 
 showUpdated.addEventListener('click', async (evt) => {
-  const directoryHandleOrUndefined = await get('directory');
-  const elements = await getStructure(directoryHandleOrUndefined);
-  console.log(elements);
+  getUpdated();
 });
 
-lastUpdateDate = new Date();
-console.log(lastUpdateDate.getTime());
+lastUpdateDate = new Date().getTime();
