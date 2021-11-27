@@ -27,19 +27,18 @@ const createInput = (id) => {
   <label for="${id}-${counter}">${id}</label>`;
 }
 
-const getUpdated = async (directory) => {
-  await directory.forEach(async (element) => {
+const getUpdated = async (directory, updatedList) => {
+  for (let element of directory) {
     if (element.value.kind === 'file') {
       if (element.updated > lastUpdateDate) {
-        
-        updated.push(element);
+        updatedList.push(element);
       };
     } else {
-      console.log(getStructure(element.value));
       const test = await getStructure(element.value);
-      await getUpdated(test);
+      await getUpdated(test, updatedList);   
     }
-  })
+  }
+  return updatedList;
 }
 
 const buildElement = async (name, type) => {
@@ -79,10 +78,9 @@ button.addEventListener('click', async (evt) => {
 });
 
 showUpdated.addEventListener('click', async (evt) => {
-  updated = [];
   const elements = await getStructure(rootFolder);
-  await getUpdated(elements);
-
+  const test = await getUpdated(elements, []);
+  console.log(test);
   lastUpdateDate = new Date().getTime();
 });
 
