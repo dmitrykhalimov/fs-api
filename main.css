@@ -1,18 +1,58 @@
+li {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 10px;
+}
+
+li:first-of-type {
+  margin-top: 10px;
+}
+
 ul {
   list-style: none;
 }
 
 .file {
-  color: green;
-}
-
-.directory {
-  color: red;
+  font-weight: normal;
+  cursor: default;
 }
 
 input {
   display: none;
 }
+
+label {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+label::before {
+  position: absolute;
+  display: block;
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: url("img/arrow.svg");
+  transform: rotate(0.25turn);
+  left: -20px;
+  top: 0;
+}
+
+input:checked ~ label::before {
+  transform: rotate(0.5turn);
+}
+
+.file::before {
+  position: absolute;
+  display: block;
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: url("img/file.svg");
+  left: -20px;
+  top: 0;
+}
+
 
 li ul {
   display: none;
