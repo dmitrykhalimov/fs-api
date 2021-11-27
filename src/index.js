@@ -77,7 +77,7 @@ const buildElement = async (name, type) => {
     element.classList.add('directory')
     element.innerHTML = createInput(name);
     const test = await getStructure(type);
-    element.appendChild(buildList(test));
+    element.appendChild(await buildList(test));
   } else {
     element.classList.add('file')
     element.textContent = name;
@@ -86,13 +86,16 @@ const buildElement = async (name, type) => {
 }
 
 // создание общего списка файлов
-const buildList = (folders) => {
+const buildList = async (folders) => {
   const list = document.createElement('ul');
   folders.sort((folder) => (folder.value.kind === 'file') ? 1 : - 1);
-  folders.forEach(async (element) => {
-    const {key: name, value: type} = element;
-    list.appendChild(await buildElement(name, type))
-  });
+  for await (let folder of folders) {
+    console.log(folder);
+    const {key: name, value: type} = folder;
+    const test = await buildElement(name, type);
+    list.appendChild(test);
+  }
+
   return list;
 };
 
@@ -148,7 +151,8 @@ const openFolder = async () => {
   removePrevious();
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
-  treeContainer.appendChild(buildList(elements));
+  const elementToRender = await buildList(elements);
+  treeContainer.appendChild(elementToRender);
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
   timerId = setInterval(checkUpdates, 1000);
