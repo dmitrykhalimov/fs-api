@@ -86,6 +86,29 @@ const buildUpdates = async (folders) => {
   return list;
 }
 
+const checkUpdates = async () => {
+  if (!permissionFlag) {
+    return;
+  }
+
+  const elements = await getStructure(rootFolder);
+  const test = await getUpdated(elements, []);
+
+  if (test.length !== 0) {
+    const result = await buildUpdates(test);
+    console.log(result);
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
+    resultContainer.appendChild(result);
+  } else {
+    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
+    if (lastReslutMessage) {
+      lastReslutMessage.remove();
+    }
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
+  }
+  lastUpdateDate = new Date().getTime();
+}
+
 button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
@@ -93,53 +116,8 @@ button.addEventListener('click', async (evt) => {
   permissionFlag = true;
 });
 
-showUpdated.addEventListener('click', async (evt) => {
-  if (!permissionFlag) {
-    return;
-  }
+showUpdated.addEventListener('click', checkUpdates);
 
-  const elements = await getStructure(rootFolder);
-  const test = await getUpdated(elements, []);
-  console.log(test);
-
-  if (test.length !== 0) {
-    const result = await buildUpdates(test);
-    console.log(result);
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
-    resultContainer.appendChild(result);
-  } else {
-    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
-    if (lastReslutMessage) {
-      lastReslutMessage.remove();
-    }
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
-  }
-  lastUpdateDate = new Date().getTime();
-  
-});
-
-setInterval(async () => {
-  if (!permissionFlag) {
-    return;
-  }
-
-  const elements = await getStructure(rootFolder);
-  const test = await getUpdated(elements, []);
-  console.log(test);
-
-  if (test.length !== 0) {
-    const result = await buildUpdates(test);
-    console.log(result);
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
-    resultContainer.appendChild(result);
-  } else {
-    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
-    if (lastReslutMessage) {
-      lastReslutMessage.remove();
-    }
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
-  }
-  lastUpdateDate = new Date().getTime();
-}, 5000)
+setInterval(checkUpdates, 1000)
 
 lastUpdateDate = new Date().getTime();
