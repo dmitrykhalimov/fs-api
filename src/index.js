@@ -4,6 +4,7 @@ import { get, set } from 'idb-keyval';
 let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
+let updated = [];
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
@@ -26,18 +27,19 @@ const createInput = (id) => {
   <label for="${id}-${counter}">${id}</label>`;
 }
 
-const getUpdated = async () => {
-  const updated = [];
-  const elements = await getStructure(rootFolder);
-  elements.forEach((element) => {
-    if (element.value.kind) {
+const getUpdated = async (directory) => {
+  await directory.forEach(async (element) => {
+    if (element.value.kind === 'file') {
       if (element.updated > lastUpdateDate) {
+        
         updated.push(element);
       };
+    } else {
+      console.log(getStructure(element.value));
+      const test = await getStructure(element.value);
+      await getUpdated(test);
     }
   })
-  lastUpdateDate = new Date().getTime();
-  console.log(updated);
 }
 
 const buildElement = async (name, type) => {
@@ -56,6 +58,10 @@ const buildElement = async (name, type) => {
   return element;
 }
 
+const consoleUpdated = () => {
+  console.log(updated);
+}
+
 const buildList = (folders) => {
   const list = document.createElement('ul');
   folders.sort((folder) => (folder.value.kind === 'file') ? 1 : - 1);
@@ -69,12 +75,15 @@ const buildList = (folders) => {
 button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
-  console.log(elements);
   treeContainer.appendChild(buildList(elements));
 });
 
 showUpdated.addEventListener('click', async (evt) => {
-  getUpdated();
+  updated = [];
+  const elements = await getStructure(rootFolder);
+  await getUpdated(elements);
+
+  lastUpdateDate = new Date().getTime();
 });
 
 lastUpdateDate = new Date().getTime();
