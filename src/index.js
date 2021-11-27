@@ -5,11 +5,12 @@ let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
 let permissionFlag = '';
+let timerId = '';
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
-const resultContainer = document.querySelector(".result");
+const resultContainer = document.querySelector(".result__container");
 
 ///////
 // работа со структурами
@@ -109,6 +110,18 @@ const buildUpdates = async (folders) => {
 // хэндлеры
 ///////
 
+const removePrevious = () => {
+  resultContainer.innerHTML = '';
+  const previousList = treeContainer.querySelector('ul');
+  if (previousList) {
+    previousList.remove();
+  }
+
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+}
+
 const checkUpdates = async () => {
   if (!permissionFlag) {
     return;
@@ -132,11 +145,13 @@ const checkUpdates = async () => {
 }
 
 const openFolder = async () => {
+  removePrevious();
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
   treeContainer.appendChild(buildList(elements));
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
+  timerId = setInterval(checkUpdates, 1000);
 }
 
 ///////
@@ -145,4 +160,3 @@ const openFolder = async () => {
 
 button.addEventListener('click', openFolder);
 showUpdated.addEventListener('click', checkUpdates);
-setInterval(checkUpdates, 1000)
