@@ -11,6 +11,11 @@ const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
 const resultContainer = document.querySelector(".result");
 
+///////
+// работа со структурами
+///////
+
+// получить структуру каталога
 const getStructure = async (directory) => {
   const structure = [];
   for await (const [key, value] of directory.entries()) {
@@ -23,20 +28,7 @@ const getStructure = async (directory) => {
   return structure;
 }
 
-const createInput = (id) => {
-  return `<input type="checkbox" id="${id}-${counter}">
-  <label for="${id}-${counter}">${id}</label>`;
-}
-
-const createResultMessage = (time, isChanged) => {
-  console.log(isChanged);
-  const element = document.createElement(`p`);
-  element.classList.add(`result__label`);
-  element.classList.add(isChanged ? 'result__label--changed' : 'result__label--not-changed');
-  element.textContent = `${time} ${isChanged ? 'Изменения есть' : 'Изменений нет'}`
-  return element;
-}
-
+// получить обновленные элементы
 const getUpdated = async (directory, updatedList) => {
   for (let element of directory) {
     if (element.value.kind === 'file') {
@@ -51,6 +43,31 @@ const getUpdated = async (directory, updatedList) => {
   return updatedList;
 }
 
+///////
+// создание элементов
+///////
+
+// элемент для раскрывающейся папки
+const createInput = (id) => {
+  return `<input type="checkbox" id="${id}-${counter}"> 
+  <label for="${id}-${counter}">${id}</label>`;
+  // counter нужен для того чтобы избежать одинаковых id
+}
+
+// сообщение об обновлениях
+const createResultMessage = (time, isChanged) => {
+  const element = document.createElement(`p`);
+  element.classList.add(`result__label`);
+  element.classList.add(isChanged ? 'result__label--changed' : 'result__label--not-changed');
+  element.textContent = `${time} ${isChanged ? 'Изменения есть' : 'Изменений нет'}`
+  return element;
+}
+
+///////
+// создание списков элементов
+///////
+
+// создание элемента файла или папки
 const buildElement = async (name, type) => {
   counter++;
   const element = document.createElement(`li`);
@@ -67,6 +84,7 @@ const buildElement = async (name, type) => {
   return element;
 }
 
+// создание общего списка файлов
 const buildList = (folders) => {
   const list = document.createElement('ul');
   folders.sort((folder) => (folder.value.kind === 'file') ? 1 : - 1);
@@ -77,6 +95,7 @@ const buildList = (folders) => {
   return list;
 };
 
+// создание списка обновленных файлов
 const buildUpdates = async (folders) => {
   const list = document.createElement('ul');
   folders.forEach(async (element) => {
@@ -86,17 +105,20 @@ const buildUpdates = async (folders) => {
   return list;
 }
 
+////////
+// хэндлеры
+///////
+
 const checkUpdates = async () => {
   if (!permissionFlag) {
     return;
   }
 
-  const elements = await getStructure(rootFolder);
-  const test = await getUpdated(elements, []);
+  const elements = await getStructure(rootFolder); //получить обновленный список элементов
+  const test = await getUpdated(elements, []); // есть ли файлы который были изменены позже даты открытия
 
   if (test.length !== 0) {
     const result = await buildUpdates(test);
-    console.log(result);
     resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
     resultContainer.appendChild(result);
   } else {
@@ -109,15 +131,18 @@ const checkUpdates = async () => {
   lastUpdateDate = new Date().getTime();
 }
 
-button.addEventListener('click', async (evt) => {
+const openFolder = async () => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
   treeContainer.appendChild(buildList(elements));
   permissionFlag = true;
-});
+  lastUpdateDate = new Date().getTime();
+}
 
+///////
+// обработчики
+//////
+
+button.addEventListener('click', openFolder);
 showUpdated.addEventListener('click', checkUpdates);
-
 setInterval(checkUpdates, 1000)
-
-lastUpdateDate = new Date().getTime();
