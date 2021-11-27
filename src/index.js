@@ -1,5 +1,4 @@
 'use strict'
-import { get, set } from 'idb-keyval';
 
 let counter = 0;
 let rootFolder = '';
