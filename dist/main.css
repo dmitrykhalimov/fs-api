@@ -98,6 +98,14 @@ input:checked ~ label::before {
   top: 0;
 }
 
+.result__label {
+  background-color: lightgreen;
+  padding: 20px;
+}
+
+.result__label--changed {
+  background-color: lightsteelblue;
+}
 
 li ul {
   display: none;
