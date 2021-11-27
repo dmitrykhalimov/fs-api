@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "idb-keyval": "5.0.2",
     "webpack": "^5.64.3",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "4.5.0"

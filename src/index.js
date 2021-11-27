@@ -1,13 +1,11 @@
 'use strict'
-
-if (window.File && window.FileReader && window.FileList && window.Blob) {
-  // Работает
-} else {
-  alert('File API не поддерживается данным браузером');
-}
+import { get, set } from 'idb-keyval';
 
 let counter = 0;
+let rootFolder = '';
+
 const button = document.querySelector(".open-folder");
+const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
 
 const getStructure = async (directory) => {
@@ -51,9 +49,14 @@ const buildList = (folders) => {
 };
 
 button.addEventListener('click', async (evt) => {
-  evt.preventDefault();
-  const dir = await window.showDirectoryPicker();
-  const elements = await getStructure(dir);
+  rootFolder = await window.showDirectoryPicker();
+  const elements = await getStructure(rootFolder);
+  await set('directory', rootFolder);
   treeContainer.appendChild(buildList(elements));
 });
 
+showUpdated.addEventListener('click', async (evt) => {
+  const directoryHandleOrUndefined = await get('directory');
+  const elements = await getStructure(directoryHandleOrUndefined);
+  console.log(elements);
+});
