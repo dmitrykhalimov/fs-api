@@ -99,16 +99,6 @@ const buildList = async (folders) => {
   return list;
 };
 
-// создание списка обновленных файлов
-const buildUpdates = async (folders) => {
-  const list = document.createElement('ul');
-  folders.forEach(async (element) => {
-    const {key: name, value: type} = element;
-    list.appendChild(await buildElement(name, type))
-  });
-  return list;
-}
-
 ////////
 // хэндлеры
 ///////
@@ -134,7 +124,7 @@ const checkUpdates = async () => {
   const test = await getUpdated(elements, []); // есть ли файлы который были изменены позже даты открытия
 
   if (test.length !== 0) {
-    const result = await buildUpdates(test);
+    const result = await buildList(test);
     resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
     resultContainer.appendChild(result);
   } else {
