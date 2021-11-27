@@ -118,4 +118,28 @@ showUpdated.addEventListener('click', async (evt) => {
   
 });
 
+setInterval(async () => {
+  if (!permissionFlag) {
+    return;
+  }
+
+  const elements = await getStructure(rootFolder);
+  const test = await getUpdated(elements, []);
+  console.log(test);
+
+  if (test.length !== 0) {
+    const result = await buildUpdates(test);
+    console.log(result);
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
+    resultContainer.appendChild(result);
+  } else {
+    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
+    if (lastReslutMessage) {
+      lastReslutMessage.remove();
+    }
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
+  }
+  lastUpdateDate = new Date().getTime();
+}, 5000)
+
 lastUpdateDate = new Date().getTime();
