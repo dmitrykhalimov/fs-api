@@ -64,6 +64,8 @@ const createResultMessage = (time, isChanged) => {
   return element;
 }
 
+// 
+
 ///////
 // создание списков элементов
 ///////
@@ -89,8 +91,7 @@ const buildElement = async (name, type) => {
 const buildList = async (folders) => {
   const list = document.createElement('ul');
   folders.sort((folder) => (folder.value.kind === 'file') ? 1 : - 1);
-  for await (let folder of folders) {
-    console.log(folder);
+  for (let folder of folders) {
     const {key: name, value: type} = folder;
     const test = await buildElement(name, type);
     list.appendChild(test);
