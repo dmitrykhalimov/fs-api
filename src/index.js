@@ -4,6 +4,7 @@ import { get, set } from 'idb-keyval';
 let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
+let permissionFlag = '';
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
@@ -25,6 +26,15 @@ const getStructure = async (directory) => {
 const createInput = (id) => {
   return `<input type="checkbox" id="${id}-${counter}">
   <label for="${id}-${counter}">${id}</label>`;
+}
+
+const createResultMessage = (time, isChanged) => {
+  console.log(isChanged);
+  const element = document.createElement(`p`);
+  element.classList.add(`result__label`);
+  element.classList.add(isChanged ? 'result__label--changed' : 'result__label--not-changed');
+  element.textContent = `${time} ${isChanged ? 'Изменения есть' : 'Изменений нет'}`
+  return element;
 }
 
 const getUpdated = async (directory, updatedList) => {
@@ -80,16 +90,29 @@ button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
   treeContainer.appendChild(buildList(elements));
+  permissionFlag = true;
 });
 
 showUpdated.addEventListener('click', async (evt) => {
+  if (!permissionFlag) {
+    return;
+  }
+
   const elements = await getStructure(rootFolder);
   const test = await getUpdated(elements, []);
   console.log(test);
-  const result = await buildUpdates(test);
-  console.log(result);
-  if (result) {
+
+  if (test.length !== 0) {
+    const result = await buildUpdates(test);
+    console.log(result);
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
     resultContainer.appendChild(result);
+  } else {
+    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
+    if (lastReslutMessage) {
+      lastReslutMessage.remove();
+    }
+    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
   }
   lastUpdateDate = new Date().getTime();
   
