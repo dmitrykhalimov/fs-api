@@ -29,7 +29,7 @@ const getStructure = async (directory) => {
 }
 
 // получить обновленные элементы
-const getUpdated = async (directory, updatedList) => {
+const getUpdated = async (directory, updatedList = []) => {
   for (let element of directory) {
     if (element.value.kind === 'file') {
       if (element.updated > lastUpdateDate) {
@@ -131,12 +131,11 @@ const checkUpdates = async () => {
   }
 
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
-  const updatedFiles = await getUpdated(elements, []); // есть ли файлы который были изменены позже даты открытия
+  const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
   if (updatedFiles.length !== 0) {
-    const resultList = await buildList(updatedFiles);
     renderMessage(true);
-    render(resultContainer, resultList);
+    render(resultContainer, await buildList(updatedFiles));
   } else {
     const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
     if (lastReslutMessage) {
