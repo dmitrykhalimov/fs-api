@@ -3,6 +3,7 @@ import { get, set } from 'idb-keyval';
 
 let counter = 0;
 let rootFolder = '';
+let lastUpdateDate = '';
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
@@ -11,7 +12,9 @@ const treeContainer = document.querySelector(".tree");
 const getStructure = async (directory) => {
   const structure = [];
   for await (const [key, value] of directory.entries()) {
-    structure.push({ key, value })
+    const element = await value.getFile();
+    console.log(element);
+    structure.push({ key, value, updated: element.lastModified})
   }
   return structure;
 }
@@ -60,3 +63,6 @@ showUpdated.addEventListener('click', async (evt) => {
   const elements = await getStructure(directoryHandleOrUndefined);
   console.log(elements);
 });
+
+lastUpdateDate = new Date();
+console.log(lastUpdateDate.getTime());
