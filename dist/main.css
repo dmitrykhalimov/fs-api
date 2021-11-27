@@ -4,6 +4,10 @@ li {
   margin-bottom: 10px;
 }
 
+h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  
+}
 li:first-of-type {
   margin-top: 10px;
 }
@@ -15,6 +19,47 @@ ul {
 .file {
   font-weight: normal;
   cursor: default;
+}
+
+.container {
+  width: 1300px;
+  margin: 0 auto;
+}
+
+.controls {
+  min-height: 50px;
+  margin-bottom: 30px;
+}
+
+.files {
+  display: flex;
+  
+
+  min-height: 100px;
+}
+
+.tree,
+.result {
+  flex: 1;
+}
+
+.tree {
+
+  margin-right: 20px;
+}
+
+button {
+  min-width: 250px;
+  height: 50px;
+  border: none;
+  background-color: midnightblue;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 input {

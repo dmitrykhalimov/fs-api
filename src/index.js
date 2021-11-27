@@ -8,6 +8,7 @@ let lastUpdateDate = '';
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
+const resultContainer = document.querySelector(".result");
 
 const getStructure = async (directory) => {
   const structure = [];
@@ -66,6 +67,15 @@ const buildList = (folders) => {
   return list;
 };
 
+const buildUpdates = async (folders) => {
+  const list = document.createElement('ul');
+  folders.forEach(async (element) => {
+    const {key: name, value: type} = element;
+    list.appendChild(await buildElement(name, type))
+  });
+  return list;
+}
+
 button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
@@ -76,7 +86,13 @@ showUpdated.addEventListener('click', async (evt) => {
   const elements = await getStructure(rootFolder);
   const test = await getUpdated(elements, []);
   console.log(test);
+  const result = await buildUpdates(test);
+  console.log(result);
+  if (result) {
+    resultContainer.appendChild(result);
+  }
   lastUpdateDate = new Date().getTime();
+  
 });
 
 lastUpdateDate = new Date().getTime();
