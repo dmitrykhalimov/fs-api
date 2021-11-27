@@ -4,7 +4,6 @@ import { get, set } from 'idb-keyval';
 let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
-let updated = [];
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
@@ -55,10 +54,6 @@ const buildElement = async (name, type) => {
     element.textContent = name;
   }
   return element;
-}
-
-const consoleUpdated = () => {
-  console.log(updated);
 }
 
 const buildList = (folders) => {
