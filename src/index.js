@@ -44,7 +44,7 @@ const getUpdated = async (directory, updatedList) => {
 }
 
 ///////
-// создание элементов
+// создание элементов и работа с DOM
 ///////
 
 // элемент для раскрывающейся папки
@@ -59,10 +59,20 @@ const createResultMessage = (time, isChanged) => {
   const element = document.createElement(`p`);
   element.classList.add(`result__label`);
   element.classList.add(isChanged ? 'result__label--changed' : 'result__label--not-changed');
-  element.textContent = `${time} ${isChanged ? 'Изменения есть' : 'Изменений нет'}`
+  element.textContent = `${time} ${isChanged ? 'Изменено:' : 'Изменений нет'}`
   return element;
 }
 
+// вставка элемента
+const render = (container, elementToRender) => {
+  container.appendChild(elementToRender);
+}
+
+// ренедринг сообщения
+const renderMessage = (isChanged) => {
+  const resultMessage = createResultMessage(new Date().toLocaleString(), isChanged);
+  render(resultContainer, resultMessage);
+}
 // 
 
 ///////
@@ -121,18 +131,18 @@ const checkUpdates = async () => {
   }
 
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
-  const test = await getUpdated(elements, []); // есть ли файлы который были изменены позже даты открытия
+  const updatedFiles = await getUpdated(elements, []); // есть ли файлы который были изменены позже даты открытия
 
-  if (test.length !== 0) {
-    const result = await buildList(test);
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), true));
-    resultContainer.appendChild(result);
+  if (updatedFiles.length !== 0) {
+    const resultList = await buildList(updatedFiles);
+    renderMessage(true);
+    render(resultContainer, resultList);
   } else {
     const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
     if (lastReslutMessage) {
       lastReslutMessage.remove();
     }
-    resultContainer.appendChild(createResultMessage(new Date().toLocaleString(), false))
+    renderMessage(false);
   }
   lastUpdateDate = new Date().getTime();
 }
