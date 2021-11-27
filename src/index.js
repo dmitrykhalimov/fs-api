@@ -12,7 +12,10 @@ const treeContainer = document.querySelector(".tree");
 const getStructure = async (directory) => {
   const structure = [];
   for await (const [key, value] of directory.entries()) {
-    const element = await value.getFile();
+    let element = ''
+    if (value.kind === 'file') {
+      element = await value.getFile();
+    }
     structure.push({ key, value, updated: element.lastModified})
   }
   return structure;
@@ -66,6 +69,7 @@ const buildList = (folders) => {
 button.addEventListener('click', async (evt) => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
+  console.log(elements);
   treeContainer.appendChild(buildList(elements));
 });
 
