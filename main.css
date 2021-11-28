@@ -21,6 +21,10 @@ ul {
   cursor: default;
 }
 
+main {
+  padding-top: 25px;
+}
+
 .container {
   width: 1300px;
   margin: 0 auto;
