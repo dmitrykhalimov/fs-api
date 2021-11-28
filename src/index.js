@@ -3,7 +3,6 @@
 import {createInput, render, renderMessage, removeFileTree } from './dom';
 import { MessageState } from "./constants";
 
-let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
 let permissionFlag = '';
@@ -64,12 +63,11 @@ const getKeys = async(directory, keysArray = []) => {
 
 // создание элемента файла или папки
 const buildElement = async (name, type) => {
-  counter++;
   const element = document.createElement(`li`);
   
   if (type.kind === 'directory') {
     element.classList.add('directory')
-    element.innerHTML = createInput(name, counter);
+    element.innerHTML = createInput(name);
     const subDirectory = await getStructure(type);
     element.appendChild(await buildList(subDirectory));
   } else {

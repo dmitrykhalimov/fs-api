@@ -4,8 +4,11 @@
 
 import { MessageState } from "./constants";
 
+let counter = 0;
+
 // элемент для раскрывающейся папки
-const createInput = (id, counter) => {
+const createInput = (id) => {
+  counter++;
   return `<input type="checkbox" id="${id}-${counter}"> 
   <label for="${id}-${counter}">${id}</label>`;
   // counter нужен для того чтобы избежать одинаковых id
