@@ -1,5 +1,8 @@
 'use strict'
 
+import {createInput, render, renderMessage, removeFileTree } from './dom';
+import { MessageState } from "./constants";
+
 let counter = 0;
 let rootFolder = '';
 let lastUpdateDate = '';
@@ -11,23 +14,7 @@ const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
 const resultContainer = document.querySelector(".result__container");
-const MessageState = {
-  NO_CHANGES: {
-    state: 'NO_CHANGES',
-    class: 'result__label--not-changed',
-    message: 'Изменений нет'
-  },
-  CHANGED_FILE: {
-    state: 'CHANGED_FILE',
-    class: 'result__label--changed',
-    message: 'Изменены файлы:'
-  },
-  CHANGED_STRUCTURE: {
-    state: 'CHANGED_STRUCTRE',
-    class: 'result__label--structure',
-    message: 'Произошли изменения в структуре файлов'
-  },
-}
+
 ///////
 // работа со структурами
 ///////
@@ -71,56 +58,6 @@ const getKeys = async(directory, keysArray = []) => {
 }
 
 ///////
-// создание элементов и работа с DOM
-///////
-
-// элемент для раскрывающейся папки
-const createInput = (id) => {
-  return `<input type="checkbox" id="${id}-${counter}"> 
-  <label for="${id}-${counter}">${id}</label>`;
-  // counter нужен для того чтобы избежать одинаковых id
-}
-
-// сообщение об обновлениях
-const createResultMessage = (currentState) => {
-  const time = new Date().toLocaleString();
-  const element = document.createElement(`p`);
-  
-  element.classList.add(`result__label`);
-  element.classList.add(currentState.class);
-  element.textContent = `${time} ${currentState.message}`
-  
-  return element;
-}
-
-// вставка элемента
-const render = (container, elementToRender) => {
-  container.appendChild(elementToRender);
-}
-
-// вставка сообщения
-const renderMessage = (currentState) => {
-  let resultMessage = '';
-
-  if (currentState.state === MessageState.NO_CHANGES.state) {
-    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
-    if (lastReslutMessage) {
-      lastReslutMessage.remove();
-    }
-  }
-
-  resultMessage = createResultMessage(currentState);
-  render(resultContainer, resultMessage);
-}
-
-const removeFileTree = () => {
-  const fileTree = treeContainer.querySelector('ul');
-  if (fileTree) {
-    fileTree.remove();
-  }
-}
-
-///////
 // создание списков элементов
 ///////
 
@@ -131,7 +68,7 @@ const buildElement = async (name, type) => {
   
   if (type.kind === 'directory') {
     element.classList.add('directory')
-    element.innerHTML = createInput(name);
+    element.innerHTML = createInput(name, counter);
     const subDirectory = await getStructure(type);
     element.appendChild(await buildList(subDirectory));
   } else {
@@ -160,7 +97,7 @@ const buildList = async (folders) => {
 
 const removePrevious = () => {
   permissionFlag = false;
-  removeFileTree();
+  removeFileTree(treeContainer);
   resultContainer.innerHTML = '';
   
   if (timerId) {
@@ -176,14 +113,14 @@ const checkUpdates = async () => {
   const newKeys = await getKeys(rootFolder); // посмотреть не изменился ли список файлов;
   
   if (previousKeys !== newKeys) {
-    removeFileTree();
+    removeFileTree(treeContainer);
 
     const elements = await getStructure(rootFolder);
     const elementToRender = await buildList(elements);
     previousKeys = newKeys;
     treeContainer.appendChild(elementToRender);
 
-    renderMessage(MessageState.CHANGED_STRUCTURE);
+    renderMessage(MessageState.CHANGED_STRUCTURE, resultContainer);
     return;
   };
 
@@ -191,10 +128,10 @@ const checkUpdates = async () => {
   const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
   if (updatedFiles.length !== 0) {
-    renderMessage(MessageState.CHANGED_FILE);
+    renderMessage(MessageState.CHANGED_FILE, resultContainer);
     render(resultContainer, await buildList(updatedFiles));
   } else {
-    renderMessage(MessageState.NO_CHANGES);
+    renderMessage(MessageState.NO_CHANGES, resultContainer);
   }
 
   lastUpdateDate = new Date().getTime();
