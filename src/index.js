@@ -47,6 +47,7 @@ const getUpdated = async (directory, updatedList = [], keys = []) => {
   return updatedList;
 }
 
+// получить список всех файлов
 const getKeys = async(directory, keysArray = []) => {
   for await (const [key, value] of directory.entries()) {
     keysArray.push(key);
@@ -91,8 +92,15 @@ const buildList = async (folders) => {
   return list;
 };
 
+// создание списка файлов
+const createTree = async () => {
+  const elements = await getStructure(rootFolder);
+  const elementToRender = await buildList(elements);
+  render(treeContainer, elementToRender);
+}
+
 ////////
-// хэндлеры
+// хэндлеры и логика
 ///////
 
 const removePrevious = () => {
@@ -105,25 +113,25 @@ const removePrevious = () => {
   }
 }
 
-const checkUpdates = async () => {
-  if (!permissionFlag) {
-    return;
-  }
-
-  const newKeys = await getKeys(rootFolder); // посмотреть не изменился ли список файлов;
+// посмотреть не изменился ли список файлов;
+const checkSturcture = async () => {
+  const newKeys = await getKeys(rootFolder); 
   
   if (previousKeys !== newKeys) {
     removeFileTree(treeContainer);
+    createTree();
 
-    const elements = await getStructure(rootFolder);
-    const elementToRender = await buildList(elements);
     previousKeys = newKeys;
-    treeContainer.appendChild(elementToRender);
 
     renderMessage(MessageState.CHANGED_STRUCTURE, resultContainer);
-    return;
+    return true;
   };
 
+  return false;
+}
+
+// посмотреть не были ли отредактированы сами файлы
+const checkChanged = async () => {
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
   const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
@@ -133,16 +141,30 @@ const checkUpdates = async () => {
   } else {
     renderMessage(MessageState.NO_CHANGES, resultContainer);
   }
+}
+
+const checkUpdates = async () => {
+  if (!permissionFlag) {
+    return;
+  }
+
+  const resultStructure = await checkSturcture();
+  if (resultStructure) {
+    return;
+  }
+
+  await checkChanged();
 
   lastUpdateDate = new Date().getTime();
 }
 
 const openFolder = async () => {
   removePrevious();
+  
   rootFolder = await window.showDirectoryPicker();
-  const elements = await getStructure(rootFolder);
-  const elementToRender = await buildList(elements);
-  treeContainer.appendChild(elementToRender);
+  
+  createTree();
+
   previousKeys = await getKeys(rootFolder);
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
