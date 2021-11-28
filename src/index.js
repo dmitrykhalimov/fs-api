@@ -94,8 +94,8 @@ const buildElement = async (name, type) => {
   if (type.kind === 'directory') {
     element.classList.add('directory')
     element.innerHTML = createInput(name);
-    const test = await getStructure(type);
-    element.appendChild(await buildList(test));
+    const subDirectory = await getStructure(type);
+    element.appendChild(await buildList(subDirectory));
   } else {
     element.classList.add('file')
     element.textContent = name;
