@@ -112,6 +112,7 @@ const removePrevious = () => {
   if (timerId) {
     clearTimeout(timerId);
     watch.textContent = 'Включить отслеживание';
+    timerId = '';
   }
 }
 
