@@ -112,7 +112,13 @@ const renderMessage = (currentState) => {
   resultMessage = createResultMessage(currentState);
   render(resultContainer, resultMessage);
 }
-// 
+
+const removeFileTree = () => {
+  const fileTree = treeContainer.querySelector('ul');
+  if (fileTree) {
+    fileTree.remove();
+  }
+}
 
 ///////
 // создание списков элементов
@@ -153,12 +159,10 @@ const buildList = async (folders) => {
 ///////
 
 const removePrevious = () => {
+  permissionFlag = false;
+  removeFileTree();
   resultContainer.innerHTML = '';
-  const previousList = treeContainer.querySelector('ul');
-  if (previousList) {
-    previousList.remove();
-  }
-
+  
   if (timerId) {
     clearTimeout(timerId);
   }
@@ -169,17 +173,15 @@ const checkUpdates = async () => {
     return;
   }
 
-  const newKeys = await getKeys(rootFolder);
+  const newKeys = await getKeys(rootFolder); // посмотреть не изменился ли список файлов;
   
   if (previousKeys !== newKeys) {
-    const previousList = treeContainer.querySelector('ul');
-    if (previousList) {
-      previousList.remove();
-      const elements = await getStructure(rootFolder);
-      const elementToRender = await buildList(elements);
-      previousKeys = newKeys;
-      treeContainer.appendChild(elementToRender);
-    }
+    removeFileTree();
+
+    const elements = await getStructure(rootFolder);
+    const elementToRender = await buildList(elements);
+    previousKeys = newKeys;
+    treeContainer.appendChild(elementToRender);
 
     renderMessage(MessageState.CHANGED_STRUCTURE);
     return;
@@ -203,8 +205,8 @@ const openFolder = async () => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
   const elementToRender = await buildList(elements);
-  previousKeys = await getKeys(rootFolder);
   treeContainer.appendChild(elementToRender);
+  previousKeys = await getKeys(rootFolder);
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
   // timerId = setInterval(checkUpdates, 1000);
