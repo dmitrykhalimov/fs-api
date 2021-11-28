@@ -36,8 +36,8 @@ const getUpdated = async (directory, updatedList = []) => {
         updatedList.push(element);
       };
     } else {
-      const test = await getStructure(element.value);
-      await getUpdated(test, updatedList);   
+      const subDirectory = await getStructure(element.value);
+      await getUpdated(subDirectory, updatedList);   
     }
   }
   return updatedList;
@@ -68,8 +68,15 @@ const render = (container, elementToRender) => {
   container.appendChild(elementToRender);
 }
 
-// ренедринг сообщения
+// вставка сообщения
 const renderMessage = (isChanged) => {
+  if (!isChanged) {
+    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
+    if (lastReslutMessage) {
+      lastReslutMessage.remove();
+    }
+  }
+
   const resultMessage = createResultMessage(new Date().toLocaleString(), isChanged);
   render(resultContainer, resultMessage);
 }
@@ -133,16 +140,12 @@ const checkUpdates = async () => {
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
   const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
+  renderMessage(updatedFiles.length !== 0);
+
   if (updatedFiles.length !== 0) {
-    renderMessage(true);
     render(resultContainer, await buildList(updatedFiles));
-  } else {
-    const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
-    if (lastReslutMessage) {
-      lastReslutMessage.remove();
-    }
-    renderMessage(false);
-  }
+  } 
+
   lastUpdateDate = new Date().getTime();
 }
 
