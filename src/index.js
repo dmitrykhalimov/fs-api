@@ -11,7 +11,23 @@ const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
 const treeContainer = document.querySelector(".tree");
 const resultContainer = document.querySelector(".result__container");
-
+const MessageState = {
+  NO_CHANGES: {
+    state: 'NO_CHANGES',
+    class: 'result__label--not-changed',
+    message: 'Изменений нет'
+  },
+  CHANGED_FILE: {
+    state: 'CHANGED_FILE',
+    class: 'result__label--changed',
+    message: 'Изменены файлы:'
+  },
+  CHANGED_STRUCTURE: {
+    state: 'CHANGED_STRUCTRE',
+    class: 'result__label--structure',
+    message: 'Произошли изменения в структуре файлов'
+  },
+}
 ///////
 // работа со структурами
 ///////
@@ -54,7 +70,6 @@ const getKeys = async(directory, keysArray = []) => {
   return JSON.stringify(keysArray);
 }
 
-
 ///////
 // создание элементов и работа с DOM
 ///////
@@ -67,11 +82,14 @@ const createInput = (id) => {
 }
 
 // сообщение об обновлениях
-const createResultMessage = (time, isChanged) => {
+const createResultMessage = (currentState) => {
+  const time = new Date().toLocaleString();
   const element = document.createElement(`p`);
+  
   element.classList.add(`result__label`);
-  element.classList.add(isChanged ? 'result__label--changed' : 'result__label--not-changed');
-  element.textContent = `${time} ${isChanged ? 'Изменено:' : 'Изменений нет'}`
+  element.classList.add(currentState.class);
+  element.textContent = `${time} ${currentState.message}`
+  
   return element;
 }
 
@@ -81,15 +99,17 @@ const render = (container, elementToRender) => {
 }
 
 // вставка сообщения
-const renderMessage = (isChanged) => {
-  if (!isChanged) {
+const renderMessage = (currentState) => {
+  let resultMessage = '';
+
+  if (currentState.state === MessageState.NO_CHANGES.state) {
     const lastReslutMessage = resultContainer.querySelector('.result__label--not-changed:last-of-type');
     if (lastReslutMessage) {
       lastReslutMessage.remove();
     }
   }
 
-  const resultMessage = createResultMessage(new Date().toLocaleString(), isChanged);
+  resultMessage = createResultMessage(currentState);
   render(resultContainer, resultMessage);
 }
 // 
@@ -157,21 +177,23 @@ const checkUpdates = async () => {
       previousList.remove();
       const elements = await getStructure(rootFolder);
       const elementToRender = await buildList(elements);
-      previousKeys = await getKeys(rootFolder);
+      previousKeys = newKeys;
       treeContainer.appendChild(elementToRender);
     }
 
+    renderMessage(MessageState.CHANGED_STRUCTURE);
     return;
   };
 
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
   const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
-  renderMessage(updatedFiles.length !== 0);
-
   if (updatedFiles.length !== 0) {
+    renderMessage(MessageState.CHANGED_FILE);
     render(resultContainer, await buildList(updatedFiles));
-  } 
+  } else {
+    renderMessage(MessageState.NO_CHANGES);
+  }
 
   lastUpdateDate = new Date().getTime();
 }
