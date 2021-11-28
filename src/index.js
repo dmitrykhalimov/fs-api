@@ -3,17 +3,19 @@
 import {createInput, render, renderMessage, removeFileTree } from './dom';
 import { MessageState } from "./constants";
 
+const TIMER_INTERVAL = 1000;
+
+const button = document.querySelector(".open-folder");
+const showUpdated = document.querySelector(".show-updated");
+const watch = document.querySelector(".enable-watch");
+const treeContainer = document.querySelector(".tree");
+const resultContainer = document.querySelector(".result__container");
+
 let rootFolder = '';
 let lastUpdateDate = '';
 let permissionFlag = '';
 let timerId = '';
 let previousKeys = [];
-
-const button = document.querySelector(".open-folder");
-const showUpdated = document.querySelector(".show-updated");
-const treeContainer = document.querySelector(".tree");
-const resultContainer = document.querySelector(".result__container");
-
 ///////
 // работа со структурами
 ///////
@@ -108,6 +110,7 @@ const removePrevious = () => {
   
   if (timerId) {
     clearTimeout(timerId);
+    watch.textContent = 'Включить отслеживание';
   }
 }
 
@@ -166,7 +169,22 @@ const openFolder = async () => {
   previousKeys = await getKeys(rootFolder);
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
-  // timerId = setInterval(checkUpdates, 1000);
+}
+
+const toggleWatch = () => {
+  if (!permissionFlag) {
+    return;
+  }
+
+  if (!timerId) {
+    watch.textContent = 'Выключить отслеживание';
+    timerId = setInterval(checkUpdates, TIMER_INTERVAL);
+
+    return;
+  }
+
+  watch.textContent = 'Включить отслеживание';
+  clearTimeout(timerId);
 }
 
 ///////
@@ -175,3 +193,4 @@ const openFolder = async () => {
 
 button.addEventListener('click', openFolder);
 showUpdated.addEventListener('click', checkUpdates);
+watch.addEventListener('click', toggleWatch);
