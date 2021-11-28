@@ -5,6 +5,7 @@
 import { MessageState } from "./constants";
 
 let counter = 0;
+const rootFolder = document.querySelector('.root-folder');
 
 // элемент для раскрывающейся папки
 const createInput = (id) => {
@@ -53,9 +54,14 @@ const removeFileTree = (treeContainer) => {
   }
 }
 
+const placeRootName = (name) => {
+  rootFolder.textContent = name;
+}
+
 export {
   createInput,
   render,
   renderMessage,
   removeFileTree,
+  placeRootName,
 }

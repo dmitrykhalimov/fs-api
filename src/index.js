@@ -1,6 +1,6 @@
 'use strict'
 
-import {createInput, render, renderMessage, removeFileTree } from './dom';
+import {createInput, render, renderMessage, removeFileTree, placeRootName } from './dom';
 import { MessageState } from "./constants";
 
 const TIMER_INTERVAL = 1000;
@@ -96,6 +96,7 @@ const buildList = async (folders) => {
 const createTree = async () => {
   const elements = await getStructure(rootFolder);
   const elementToRender = await buildList(elements);
+  placeRootName(rootFolder.name);
   render(treeContainer, elementToRender);
 }
 
@@ -163,7 +164,6 @@ const openFolder = async () => {
   removePrevious();
   
   rootFolder = await window.showDirectoryPicker();
-  
   createTree();
 
   previousKeys = await getKeys(rootFolder);
