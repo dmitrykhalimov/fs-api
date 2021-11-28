@@ -5,6 +5,7 @@ let rootFolder = '';
 let lastUpdateDate = '';
 let permissionFlag = '';
 let timerId = '';
+let previousKeys = [];
 
 const button = document.querySelector(".open-folder");
 const showUpdated = document.querySelector(".show-updated");
@@ -29,7 +30,7 @@ const getStructure = async (directory) => {
 }
 
 // получить обновленные элементы
-const getUpdated = async (directory, updatedList = []) => {
+const getUpdated = async (directory, updatedList = [], keys = []) => {
   for (let element of directory) {
     if (element.value.kind === 'file') {
       if (element.updated > lastUpdateDate) {
@@ -42,6 +43,17 @@ const getUpdated = async (directory, updatedList = []) => {
   }
   return updatedList;
 }
+
+const getKeys = async(directory, keysArray = []) => {
+  for await (const [key, value] of directory.entries()) {
+    keysArray.push(key);
+    if (value.kind === 'directory') {
+      await getKeys(value, keysArray);
+    }
+  }
+  return JSON.stringify(keysArray);
+}
+
 
 ///////
 // создание элементов и работа с DOM
@@ -137,6 +149,21 @@ const checkUpdates = async () => {
     return;
   }
 
+  const newKeys = await getKeys(rootFolder);
+  
+  if (previousKeys !== newKeys) {
+    const previousList = treeContainer.querySelector('ul');
+    if (previousList) {
+      previousList.remove();
+      const elements = await getStructure(rootFolder);
+      const elementToRender = await buildList(elements);
+      previousKeys = await getKeys(rootFolder);
+      treeContainer.appendChild(elementToRender);
+    }
+
+    return;
+  };
+
   const elements = await getStructure(rootFolder); //получить обновленный список элементов
   const updatedFiles = await getUpdated(elements); // есть ли файлы который были изменены позже даты открытия
 
@@ -154,10 +181,11 @@ const openFolder = async () => {
   rootFolder = await window.showDirectoryPicker();
   const elements = await getStructure(rootFolder);
   const elementToRender = await buildList(elements);
+  previousKeys = await getKeys(rootFolder);
   treeContainer.appendChild(elementToRender);
   permissionFlag = true;
   lastUpdateDate = new Date().getTime();
-  timerId = setInterval(checkUpdates, 1000);
+  // timerId = setInterval(checkUpdates, 1000);
 }
 
 ///////
