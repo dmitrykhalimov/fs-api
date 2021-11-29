@@ -16,6 +16,7 @@ let lastUpdateDate = '';
 let permissionFlag = '';
 let timerId = '';
 let previousKeys = [];
+
 ///////
 // работа со структурами
 ///////
